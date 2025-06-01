@@ -1,0 +1,33 @@
+<div class="card h-100">
+    <img src="{{ game.image.url }}" class="card-img-top game-image" alt="{{ game.title }}">
+    <div class="card-body">
+        <h5 class="card-title">{{ game.title }}</h5>
+        <div class="mb-2">
+            {% if game.discount > 0 %}
+                <span class="text-danger"><del>{{ game.price }} руб.</del></span>
+                <span class="fs-5 ms-2">{{ game.discounted_price }} руб.</span>
+                <span class="badge bg-danger ms-2">-{{ game.discount }}%</span>
+            {% else %}
+                <span class="fs-5">{{ game.price }} руб.</span>
+            {% endif %}
+        </div>
+        <p class="card-text">{{ game.description|truncatechars:100 }}</p>
+        {% if game.average_rating %}
+        <div class="rating mb-2">
+            {% with game.average_rating|floatformat:0 as stars %}
+                {% for i in "12345" %}
+                    {% if forloop.counter <= stars %}
+                        <i class="fas fa-star text-warning"></i>
+                    {% else %}
+                        <i class="far fa-star text-warning"></i>
+                    {% endif %}
+                {% endfor %}
+                <small class="text-muted">({{ game.average_rating|floatformat:1 }})</small>
+            {% endwith %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-footer">
+        <a href="{% url 'catalog:game_detail' game.pk %}" class="btn btn-primary">Подробнее</a>
+    </div>
+</div>

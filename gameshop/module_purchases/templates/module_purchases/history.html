@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>История покупок</h2>
+
+    <p><strong>Всего куплено игр:</strong> {{ total_purchases }}</p>
+    <p><strong>Общая сумма потраченная на игры:</strong> {{ total_spent }} руб.</p>
+
+    <div class="list-group">
+        {% for purchase in purchases %}
+        <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ purchase.game.title }}</h5>
+                <small>{{ purchase.purchase_date|date:"d.m.Y H:i" }}</small>
+            </div>
+            <div class="d-flex align-items-center mb-1">
+                {% if purchase.discount > 0 %}
+                <span class="text-muted text-decoration-line-through me-2">{{ purchase.original_price }} руб.</span>
+                <span class="fw-bold">{{ purchase.price }} руб.</span>
+                <span class="badge bg-danger ms-2">-{{ purchase.discount }}%</span>
+                {% else %}
+                <span class="fw-bold">{{ purchase.price }} руб.</span>
+                {% endif %}
+            </div>
+            <small>Ключ активации: <code>{{ purchase.activation_key }}</code></small>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">У вас пока нет покупок</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

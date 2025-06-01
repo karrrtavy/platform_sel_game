@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Мои избранные игры</h1>
+    
+    {% if games %}
+    <div class="row">
+        {% for game in games %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ game.title }}</h5>
+                    <p class="card-text">{{ game.description|truncatechars:100 }}</p>
+                    <h6>{{ game.price }} руб.</h6>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'catalog:game_detail' game.pk %}" class="btn btn-primary">Подробнее</a>
+                    <button class="btn btn-danger toggle-favorite" data-game-id="{{ game.id }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        У вас пока нет избранных игр.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

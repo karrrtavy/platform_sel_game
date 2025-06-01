@@ -1,0 +1,5 @@
+code.txt
+.venv
+migrations
+__pycache__
+.VSCodeCounter

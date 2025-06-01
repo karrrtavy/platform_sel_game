@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4>{{ seller.username }}</h4>
+                    <p class="text-muted">Продавец</p>
+                    
+                    {% if seller_avg_rating %}
+                    <div class="my-3">
+                        <div class="display-4">{{ seller_avg_rating|floatformat:1 }}</div>
+                        <div class="text-warning mb-2">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= seller_avg_rating|floatformat:0 %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">на основе {{ rating_count }} оценок</small>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <p><strong>Игр в продаже:</strong> {{ game_count }}</p>
+                        <p><strong>Всего продаж:</strong> {{ total_sales }}</p>
+                        {% if avg_game_rating %}
+                        <p><strong>Средний рейтинг игр:</strong> {{ avg_game_rating|floatformat:1 }}/5</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Игры продавца</h3>
+                {% if user == seller %}
+                <a href="{% url 'catalog:game_form' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Добавить игру
+                </a>
+                {% endif %}
+            </div>
+            
+            {% if games %}
+            <div class="row">
+                {% for game in games %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.title }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ game.title }}</h5>
+                            <p class="card-text">{{ game.description|truncatechars:100 }}</p>
+                            <div class="d-flex align-items-center">
+                                {% if game.discount > 0 %}
+                                <div>
+                                    <span class="text-muted text-decoration-line-through me-2">{{ game.price }} руб.</span>
+                                    <span class="fw-bold text-danger">{{ game.discounted_price }} руб.</span>
+                                    <span class="badge bg-danger ms-2">-{{ game.discount }}%</span>
+                                </div>
+                                {% else %}
+                                <span class="fw-bold">{{ game.price }} руб.</span>
+                                {% endif %}
+                            </div>
+                            {% if game.average_rating %}
+                            <div class="mt-2">
+                                {% with ''|center:game.average_rating as range %}
+                                {% for _ in range %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% endfor %}
+                                {% endwith %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'catalog:game_detail' game.pk %}" class="btn btn-primary">Подробнее</a>
+                            {% if user == seller %}
+                            <a href="{% url 'catalog:game_delete' game.pk %}" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">У этого продавца пока нет игр в продаже.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

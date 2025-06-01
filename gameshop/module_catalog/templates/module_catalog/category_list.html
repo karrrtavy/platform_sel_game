@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Каталог игр</h1>
+    
+    {% if is_featured %}
+    <div class="alert alert-info">
+        <h4>Избранные игры</h4>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% for game in games %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 {% if game.is_featured %}border-primary{% endif %}">
+                {% if game.is_featured %}
+                <div class="card-header bg-primary text-white">
+                    Избранная игра
+                </div>
+                {% endif %}
+                <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ game.title }}</h5>
+                    <p class="card-text">{{ game.description|truncatechars:100 }}</p>
+                    <h6>{{ game.price }} руб.</h6>
+                    {% if game.average_rating %}
+                    <div class="mb-2">
+                        {% with ''|center:game.average_rating as range %}
+                        {% for _ in range %}
+                            <i class="fas fa-star text-warning"></i>
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'catalog:game_detail' game.pk %}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

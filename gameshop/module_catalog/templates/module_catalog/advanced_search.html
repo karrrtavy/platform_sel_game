@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Расширенный поиск игр</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ current_query }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="min_price" class="form-control" placeholder="Мин. цена" value="{{ current_min_price }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="max_price" class="form-control" placeholder="Макс. цена" value="{{ current_max_price }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="category" class="form-select">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if current_category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="platform" class="form-select">
+                        <option value="">Все платформы</option>
+                        {% for platform in platforms %}
+                        <option value="{{ platform }}" {% if current_platform == platform %}selected{% endif %}>{{ platform }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="sort" class="form-select">
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Сначала новые</option>
+                        <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Сначала старые</option>
+                        <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Цена по возрастанию</option>
+                        <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Цена по убыванию</option>
+                        <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>По рейтингу</option>
+                        <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>По популярности</option>
+                        <option value="views" {% if current_sort == 'views' %}selected{% endif %}>По просмотрам</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Поиск</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if games %}
+    <div class="row">
+        {% for game in games %}
+        <div class="col-md-4 mb-4">
+            {% include 'module_catalog/game_card.html' %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">Ничего не найдено по вашему запросу</div>
+    {% endif %}
+</div>
+{% endblock %}

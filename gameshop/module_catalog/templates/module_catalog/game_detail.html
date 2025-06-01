@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ game.image.url }}" class="img-fluid rounded" alt="{{ game.title }}">
+            {% if game.discount > 0 %}
+            <div class="mt-2">
+                <span class="badge bg-danger fs-5">-{{ game.discount }}%</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h1>{{ game.title }}</h1>
+            
+            <div class="mb-3">
+                {% if game.discount > 0 %}
+                <div class="d-flex align-items-center">
+                    <span class="text-muted text-decoration-line-through me-2 fs-4">{{ game.price }} руб.</span>
+                    <span class="text-danger fw-bold fs-3">{{ game.discounted_price }} руб.</span>
+                </div>
+                {% else %}
+                <span class="fw-bold fs-3">{{ game.price }} руб.</span>
+                {% endif %}
+            </div>
+            
+            <p>{{ game.description }}</p>
+
+            <div class="mb-3">
+                {% if user == game.seller %}
+                <div class="mt-3">
+                    <a href="{% url 'catalog:game_delete' game.pk %}" class="btn btn-danger">Удалить игру</a>
+                </div>
+                {% endif %}
+                <p>Продавец: <a href="{% url 'catalog:seller_profile' game.seller.username %}">{{ game.seller.username }}</a></p>
+                <div class="d-flex gap-3">
+                    <span class="badge bg-info">Просмотров: {{ game.views_count }}</span>
+                    <span class="badge bg-secondary">Продано: {{ game.sales_count }}</span>
+                    {% if game.average_rating %}
+                    <span class="badge bg-warning text-dark">Рейтинг: {{ game.average_rating|floatformat:1 }}/5</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if user.is_authenticated and user != game.seller %}
+                <form method="post" action="{% url 'catalog:buy_game' game.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg">Купить за {{ game.current_price }} руб.</button>
+                </form>
+            {% elif user == game.seller %}
+                <div class="alert alert-info">Это ваша игра</div>
+            {% else %}
+                <div class="alert alert-warning">Войдите, чтобы купить игру</div>
+            {% endif %}
+
+            <div class="mt-5">
+                <h3>Отзывы</h3>
+                {% if game.average_rating %}
+                <div class="mb-3">
+                    <span class="badge bg-primary">Средняя оценка: {{ game.average_rating|floatformat:1 }}/5</span>
+                </div>
+                {% endif %}
+                
+                {% if has_purchased %}
+                    {% if user_review %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <strong>Ваш отзыв</strong>
+                            <a href="{% url 'catalog:review_delete' game.pk user_review.pk %}" class="btn btn-sm btn-danger float-end">Удалить</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= user_review.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p>{{ user_review.text }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <strong>Оставить отзыв</strong>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'catalog:game_detail' game.pk %}">
+                                {% csrf_token %}
+                                {{ form|crispy }}
+                                <button type="submit" class="btn btn-primary mt-2">Отправить</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                
+                {% for review in reviews %}
+                    {% if not user_review or review.user != request.user %}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <strong>{{ review.user.username }}</strong>
+                            <span class="float-end">{{ review.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p>{{ review.text }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="alert alert-info">Пока нет отзывов. Будьте первым!</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-5">
+    <h3>Комментарии</h3>
+    
+    {% if user.is_authenticated %}
+    <div class="mb-4">
+        <form id="comment-form" data-game-id="{{ game.pk }}">
+            {% csrf_token %}
+            <textarea class="form-control mb-2" name="text" rows="3" placeholder="Оставьте комментарий..."></textarea>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <div id="comments-list">
+        {% for comment in game.comments.all %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>{{ comment.user.username }}</strong>
+                <span class="text-muted float-end">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            <div class="card-body">
+                <p>{{ comment.text }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">Пока нет комментариев. Будьте первым!</div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// AJAX для комментариев
+document.getElementById('comment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const gameId = form.dataset.gameId;
+    const formData = new FormData(form);
+    
+    fetch(`/catalog/comment/${gameId}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'card mb-3';
+            newComment.innerHTML = `
+                <div class="card-header">
+                    <strong>${data.comment.username}</strong>
+                    <span class="text-muted float-end">${data.comment.date}</span>
+                </div>
+                <div class="card-body">
+                    <p>${data.comment.text}</p>
+                </div>
+            `;
+            commentsList.prepend(newComment);
+            form.reset();
+        }
+    });
+});
+
+// AJAX для ответов на отзывы
+document.querySelectorAll('.reply-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const reviewId = this.dataset.reviewId;
+        const formData = new FormData(this);
+        
+        fetch(`/catalog/reply/${reviewId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const replyContainer = document.getElementById(`reply-container-${reviewId}`);
+                replyContainer.innerHTML = `
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <strong>Ответ продавца</strong>
+                            <span class="text-muted float-end">${data.reply.date}</span>
+                        </div>
+                        <div class="card-body">
+                            <p>${data.reply.text}</p>
+                        </div>
+                    </div>
+                `;
+                this.reset();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-success">
+        <h4 class="alert-heading">Покупка успешно завершена!</h4>
+        <p>Вы приобрели игру: <strong>{{ purchase.game.title }}</strong></p>
+        <hr>
+        <p class="mb-0">Ваш ключ активации: <code>{{ purchase.key }}</code></p>
+    </div>
+    <a href="{% url 'catalog:game_list' %}" class="btn btn-primary">Вернуться в каталог</a>
+</div>
+{% endblock %}

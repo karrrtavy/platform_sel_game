@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Результаты поиска: "{{ request.GET.q }}"</h1>
+    
+    {% if games %}
+        <div class="row">
+            {% for game in games %}
+            <div class="col-md-4 mb-4">
+                {% include 'module_catalog/_game_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">Ничего не найдено по запросу "{{ request.GET.q }}"</div>
+    {% endif %}
+</div>
+{% endblock %}
+
